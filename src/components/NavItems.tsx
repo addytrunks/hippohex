@@ -1,32 +1,55 @@
-"use client"
+"use client";
 
-import { PRODUCT_CATEGORIES } from "@/config"
-import { useState } from "react"
-import NavItem from "./NavItem"
+import { PRODUCT_CATEGORIES } from "@/config";
+import { useEffect, useRef, useState } from "react";
+import NavItem from "./NavItem";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 const NavItems = () => {
+  const [activeIndex, setActiveIndex] = useState<null | number>(null);
+  const isAnyOpen = activeIndex !== null;
 
-    const [activeIndex, setActiveIndex] = useState<null|number>(null)
-    const isAnyOpen = activeIndex !== null;
+  const navRef = useRef<HTMLDivElement | null>(null);
+
+  useOnClickOutside(navRef, () => setActiveIndex(null));
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveIndex(null);
+      }
+    };
+    document.addEventListener("keydown", (e) => handler(e));
+
+    return () => {
+      document.removeEventListener("keydown", handler);
+    };
+  }, []);
 
   return (
-    <div className="flex gap-4 h-full">
-        {PRODUCT_CATEGORIES.map((category,i) => {
-            const handleOpen = () => {
-                if(activeIndex === i) {
-                    setActiveIndex(null)
-                }else{
-                    setActiveIndex(i)
-                }
-            }
+    <div className="flex gap-4 h-full" ref={navRef}>
+      {PRODUCT_CATEGORIES.map((category, i) => {
+        const handleOpen = () => {
+          if (activeIndex === i) {
+            setActiveIndex(null);
+          } else {
+            setActiveIndex(i);
+          }
+        };
 
-            const isOpen = i === activeIndex;
-            return (
-                <NavItem key={i} category={category} isOpen={isOpen} handleOpen={handleOpen} isAnyOpen={isAnyOpen}/>
-            )
-        })}
+        const isOpen = i === activeIndex;
+        return (
+          <NavItem
+            key={i}
+            category={category}
+            isOpen={isOpen}
+            handleOpen={handleOpen}
+            isAnyOpen={isAnyOpen}
+          />
+        );
+      })}
     </div>
-  )
-}
+  );
+};
 
-export default NavItems
+export default NavItems;
